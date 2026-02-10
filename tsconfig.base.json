@@ -1,0 +1,47 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "allowImportingTsExtensions": false,
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2021",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@goride/shared": [
+        "libs/shared/src"
+      ],
+      "@goride/shared/*": [
+        "libs/shared/src/*"
+      ],
+      "@auth/*": [
+        "apps/api-gateway/src/auth/*"
+      ],
+      "@user/*": [
+        "apps/api-gateway/src/user/*"
+      ],
+      "@motorbike/*": [
+        "apps/api-gateway/src/motorbike/*"
+      ],
+      "@rental/*": [
+        "apps/api-gateway/src/rental/*"
+      ]
+    }
+  },
+  "ts-node": {
+    "esm": false,
+    "experimentalSpecifierResolution": "node"
+  }
+}

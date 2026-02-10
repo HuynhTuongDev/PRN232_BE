@@ -1,0 +1,12 @@
+{
+  "name": "@goride/api-gateway",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "nest build api-gateway",
+    "start": "node dist/apps/api-gateway/main",
+    "start:dev": "nest start api-gateway --watch",
+    "start:debug": "nest start api-gateway --debug --watch",
+    "start:prod": "node dist/apps/api-gateway/main"
+  }
+}

@@ -1,0 +1,255 @@
+// GoRide - Online Motorbike Rental Website Database Schema
+// Database: PostgreSQL
+// ORM: Prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// USER MANAGEMENT
+// ============================================
+
+enum UserRole {
+  CUSTOMER
+  ADMIN
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String   // Hashed password
+  name      String
+  phone     String?
+  address   String?
+  role      UserRole @default(CUSTOMER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  rentals   Rental[]
+  reviews   Review[]
+  chatMessages ChatMessage[]
+
+  @@map("users")
+}
+
+// ============================================
+// MOTORBIKE MANAGEMENT
+// ============================================
+
+enum MotorbikeType {
+  MANUAL      // Xe số
+  SCOOTER     // Xe ga
+  SEMI_AUTO   // Xe côn
+}
+
+enum MotorbikeStatus {
+  AVAILABLE   // Có sẵn
+  RENTED      // Đang được thuê
+  MAINTENANCE // Bảo trì
+  UNAVAILABLE // Không khả dụng
+}
+
+model Motorbike {
+  id           String          @id @default(uuid())
+  name         String          // Tên xe (ví dụ: Honda Wave RSX)
+  type         MotorbikeType   // Loại xe
+  pricePerDay  Decimal         @db.Decimal(10, 2) // Giá thuê/ngày
+  description  String?         @db.Text // Mô tả chi tiết
+  status       MotorbikeStatus @default(AVAILABLE)
+  licensePlate String          @unique // Biển số xe
+  year         Int?            // Năm sản xuất
+  images       String[]        // Mảng URL hình ảnh
+  fuelCapacity String?         // Dung tích bình xăng
+  engineSize   String?         // Dung tích động cơ
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  // Relationships
+  rentals      Rental[]
+  reviews      Review[]
+
+  @@index([type])
+  @@index([status])
+  @@index([pricePerDay])
+  @@map("motorbikes")
+}
+
+// ============================================
+// RENTAL MANAGEMENT
+// ============================================
+
+enum RentalStatus {
+  PENDING    // Chờ xác nhận
+  CONFIRMED  // Đã xác nhận
+  ONGOING    // Đang thuê
+  COMPLETED  // Hoàn thành
+  CANCELLED  // Đã hủy
+}
+
+model Rental {
+  id             String       @id @default(uuid())
+  userId         String       // Khách hàng thuê xe
+  motorbikeId    String       // Xe được thuê
+  startDate      DateTime     // Ngày bắt đầu thuê
+  endDate        DateTime     // Ngày kết thúc thuê
+  pickupLocation String       // Địa điểm nhận xe
+  returnLocation String       // Địa điểm trả xe
+  status         RentalStatus @default(PENDING)
+  totalPrice     Decimal      @db.Decimal(10, 2) // Tổng giá tiền
+  numberOfDays   Int          // Số ngày thuê (tính toán)
+  notes          String?      @db.Text // Ghi chú
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  // Relationships
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  motorbike      Motorbike    @relation(fields: [motorbikeId], references: [id])
+  payments       Payment[]
+  review         Review?
+
+  @@index([userId])
+  @@index([motorbikeId])
+  @@index([status])
+  @@index([startDate])
+  @@index([endDate])
+  @@map("rentals")
+}
+
+// ============================================
+// PAYMENT MANAGEMENT
+// ============================================
+
+enum PaymentMethod {
+  CASH            // Thanh toán khi nhận xe
+  BANK_TRANSFER   // Chuyển khoản
+  E_WALLET        // Ví điện tử (cho tương lai)
+}
+
+enum PaymentStatus {
+  PENDING   // Chờ thanh toán
+  COMPLETED // Đã thanh toán
+  FAILED    // Thanh toán thất bại
+  REFUNDED  // Đã hoàn tiền
+}
+
+model Payment {
+  id             String        @id @default(uuid())
+  rentalId       String        @unique // Một đơn thuê có một thanh toán
+  amount         Decimal       @db.Decimal(10, 2) // Số tiền
+  method         PaymentMethod // Phương thức thanh toán
+  status         PaymentStatus @default(PENDING)
+  transactionId  String?       @unique // Mã giao dịch (nếu chuyển khoản)
+  transactionDate DateTime?    // Ngày giao dịch
+  notes          String?       @db.Text // Ghi chú
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  // Relationships
+  rental         Rental        @relation(fields: [rentalId], references: [id], onDelete: Cascade)
+
+  @@index([rentalId])
+  @@index([status])
+  @@index([transactionDate])
+  @@map("payments")
+}
+
+// ============================================
+// REVIEW & RATING
+// ============================================
+
+model Review {
+  id          String   @id @default(uuid())
+  rentalId    String   @unique // Một đơn thuê chỉ có một đánh giá
+  userId      String   // Người đánh giá
+  motorbikeId String   // Xe được đánh giá
+  rating      Int      // Điểm đánh giá (1-5)
+  comment     String?  @db.Text // Nhận xét
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  rental      Rental   @relation(fields: [rentalId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id])
+  motorbike   Motorbike @relation(fields: [motorbikeId], references: [id])
+
+  @@index([userId])
+  @@index([motorbikeId])
+  @@index([rating])
+  @@map("reviews")
+}
+
+// ============================================
+// CHATBOT & AI INTEGRATION
+// ============================================
+
+model ChatMessage {
+  id        String   @id @default(uuid())
+  userId    String?  // null nếu là khách vãng lai
+  message   String   @db.Text // Câu hỏi của người dùng
+  response  String   @db.Text // Phản hồi từ chatbot
+  isAI      Boolean  @default(true) // true nếu là phản hồi từ AI
+  createdAt DateTime @default(now())
+
+  // Relationships
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("chat_messages")
+}
+
+model ChatbotConfig {
+  id          String   @id @default(uuid())
+  key         String   @unique // Key cấu hình
+  value       String   @db.Text // Giá trị cấu hình
+  description String?  @db.Text // Mô tả
+  isActive    Boolean  @default(true) // Trạng thái hoạt động
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("chatbot_configs")
+}
+
+// ============================================
+// BLOG & NEWS
+// ============================================
+
+model Blog {
+  id          String   @id @default(uuid())
+  title       String
+  description String?  @db.Text // Tóm tắt
+  content     String   @db.Text // Nội dung chi tiết
+  image       String   // URL hình ảnh
+  tag         String?  // Gắn thẻ (Kinh nghiệm, Cẩm nang...)
+  author      String?  @default("Admin")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("blogs")
+}
+
+// ============================================
+// PROMOTIONS & OFFERS
+// ============================================
+
+model Promotion {
+  id          String   @id @default(uuid())
+  title       String
+  description String   @db.Text
+  image       String   // URL hình ảnh
+  badge       String?  // Ví dụ: "20% OFF", "Mới"
+  startDate   DateTime?
+  endDate     DateTime?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("promotions")
+}

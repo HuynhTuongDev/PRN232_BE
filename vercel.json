@@ -1,0 +1,21 @@
+{
+    "version": 2,
+    "builds": [
+        {
+            "src": "apps/api-gateway/src/index.ts",
+            "use": "@vercel/node"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/(.*)",
+            "dest": "apps/api-gateway/src/index.ts"
+        }
+    ],
+    "functions": {
+        "apps/api-gateway/src/index.ts": {
+            "memory": 1024,
+            "maxDuration": 10
+        }
+    }
+}
