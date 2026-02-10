@@ -1,0 +1,11 @@
+.git
+node_modules
+dist
+test
+apps/web-user
+apps/web-manager
+README.md
+SETUP_GUIDE.md
+PROJECT_STRUCTURE.md
+.npmrc
+.env.example

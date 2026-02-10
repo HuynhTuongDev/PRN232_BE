@@ -3,6 +3,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { ExpressAdapter } from '@nestjs/platform-express';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import express from 'express';
 
 const server = express();
@@ -37,6 +38,16 @@ const bootstrap = async () => {
             // Global prefix
             const apiPrefix = process.env.API_PREFIX || 'api/v1';
             app.setGlobalPrefix(apiPrefix);
+
+            // Swagger Documentation
+            const config = new DocumentBuilder()
+                .setTitle('GoRide API Documentation')
+                .setDescription('The official API documentation for GoRide - Motorbike Rental Platform')
+                .setVersion('1.0')
+                .addBearerAuth()
+                .build();
+            const document = SwaggerModule.createDocument(app, config);
+            SwaggerModule.setup(`${apiPrefix}/docs`, app, document);
 
             await app.init();
             console.log('NestJS bootstrap completed successfully.');
