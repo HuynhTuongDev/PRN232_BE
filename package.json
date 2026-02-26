@@ -1,12 +1,8 @@
 {
-  "name": "goride",
+  "name": "goride-be",
   "version": "1.0.0",
   "private": true,
-  "description": "GoRide - Motorbike Rental Platform - NestJS Monorepo",
-  "workspaces": [
-    "apps/*",
-    "libs/*"
-  ],
+  "description": "GoRide - Backend API (NestJS)",
   "scripts": {
     "build": "prisma generate && nest build",
     "vercel-build": "prisma generate && nest build",
@@ -14,19 +10,11 @@
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/apps/api-gateway/main",
-    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "start:prod": "node dist/src/main",
+    "lint": "eslint \"{src,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
-    "dev:gateway": "nest start api-gateway --watch",
-    "dev:web-user": "npm run dev -w @goride/web-user",
-    "dev:web-manager": "npm run dev -w @goride/web-manager",
-    "dev:be": "npm run dev:gateway",
-    "dev:fe": "concurrently \"npm run dev:web-user\" \"npm run dev:web-manager\"",
-    "dev": "concurrently \"npm run dev:be\" \"npm run dev:fe\"",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
@@ -78,7 +66,7 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.3.3",
-    "concurrently": "^8.2.2"
+    "rimraf": "^5.0.5"
   },
   "jest": {
     "moduleFileExtensions": [

@@ -1,63 +1,30 @@
-# GoRide - NestJS Monolith
+# GoRide - Backend
 
-> 🚀 **Nền tảng cho thuê xe máy tại Quy Nhơn** - Kiến trúc Backend tập trung (NestJS) và Frontend (Next.js)
+Backend API for the GoRide platform, built with NestJS and Prisma.
 
-## 📚 Tài Liệu
+## Getting Started
 
-- **[📖 Hướng Dẫn Setup Chi Tiết](./SETUP_GUIDE.md)** - Hướng dẫn đầy đủ cách cài đặt và chạy dự án
-- **[📋 Cấu Trúc Dự Án](./PROJECT_STRUCTURE.md)** - Chi tiết về kiến trúc Monolith mới
+1.  **Install dependencies**:
+    ```bash
+    npm install
+    ```
 
-## ⚡ Quick Start
+2.  **Environment Variables**:
+    Create a `.env` file from `.env.example` and update the `DATABASE_URL`.
 
-```bash
-# 1. Cài đặt dependencies
-npm install
+3.  **Setup Database**:
+    ```bash
+    npm run prisma:generate
+    npm run prisma:migrate
+    ```
 
-# 2. Cấu hình database (tạo file .env từ .env.example)
-cp .env.example .env
-# Cập nhật DATABASE_URL trong .env
+4.  **Run Development**:
+    ```bash
+    npm run start:dev
+    ```
 
-# 3. Setup database
-npm run prisma:generate
-npm run prisma:migrate
+## Project Structure
 
-# 4. Chạy toàn bộ hệ thống
-npm run dev
-```
-
-**Truy cập:**
-- 🌐 Web User: http://localhost:3002
-- 🔧 Web Manager: http://localhost:3003
-- 🔌 API Gateway (Monolith): http://localhost:3000/api/v1
-
-## Cấu trúc dự án
-
-```
-goride/
-├── apps/
-│   ├── api-gateway/        # NestJS Backend Monolith (Port 3000)
-│   ├── web-user/          # Next.js Frontend User (Port 3002)
-│   └── web-manager/        # Next.js Frontend Manager (Port 3003)
-├── libs/
-│   └── shared/             # Shared code, types, constants, DTOs
-├── prisma/
-│   └── schema.prisma       # Prisma database schema
-└── package.json            # Root configuration
-```
-
-## Chạy Development
-
-```bash
-# Chạy cả Backend và Frontend
-npm run dev
-
-# Chỉ chạy Backend
-npm run dev:be
-
-# Chỉ chạy Frontend
-npm run dev:fe
-```
-
-## Lưu ý quan trọng
-
-Dự án đã được chuyển đổi từ mô hình Microservices thành **Monolith** tập trung tại `api-gateway`. Toàn bộ giao tiếp gRPC đã bị loại bỏ để đơn giản hóa việc triển khai và bảo trì.
+- `src/`: Core backend logic (formerly in api-gateway)
+- `libs/shared/`: Shared types and utilities
+- `prisma/`: Database schema and migrations
