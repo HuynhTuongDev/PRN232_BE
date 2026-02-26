@@ -1,4 +1,19 @@
 import 'reflect-metadata';
+import { register } from 'tsconfig-paths';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+
+// Load and register aliases from tsconfig.json
+try {
+    const tsconfig = JSON.parse(readFileSync(join(process.cwd(), 'tsconfig.json'), 'utf8'));
+    register({
+        baseUrl: './',
+        paths: tsconfig.compilerOptions.paths,
+    });
+} catch (e) {
+    console.warn('Could not register path aliases:', e.message);
+}
+
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
@@ -7,7 +22,14 @@ import { ExpressAdapter } from '@nestjs/platform-express';
 import express from 'express';
 
 const server = express();
-server.get('/_health', (req, res) => res.send('OK'));
+server.get('/_health', (req, res) => res.status(200).send('OK'));
+server.get('/_env_check', (req, res) => {
+    res.json({
+        hasDbUrl: !!process.env.DATABASE_URL,
+        nodeEnv: process.env.NODE_ENV,
+        timestamp: new Date().toISOString()
+    });
+});
 
 let app: any;
 
