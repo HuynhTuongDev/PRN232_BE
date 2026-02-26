@@ -22,8 +22,8 @@ import { ExpressAdapter } from '@nestjs/platform-express';
 import express from 'express';
 
 const server = express();
-server.get('/_health', (req, res) => res.status(200).send('OK'));
-server.get('/_env_check', (req, res) => {
+server.get('/health', (req, res) => res.status(200).send('OK'));
+server.get('/env-check', (req, res) => {
     res.json({
         hasDbUrl: !!process.env.DATABASE_URL,
         hasJwtSecret: !!process.env.JWT_SECRET,
@@ -60,15 +60,30 @@ const bootstrap = async () => {
 
         app.enableCors({
             origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean | string) => void) => {
+                console.log(`CORS Check - Origin: ${origin}`);
+                console.log(`CORS Check - Allowed: ${JSON.stringify(allowedOrigins)}`);
+
                 // Allow requests with no origin (e.g. mobile apps, curl, Postman)
                 if (!origin) return callback(null, true);
-                // If no whitelist is configured, allow all origins
-                if (!allowedOrigins) return callback(null, true);
+
+                // If no whitelist is configured, allow all
+                if (!allowedOrigins || allowedOrigins.length === 0 || allowedOrigins.includes('*')) {
+                    return callback(null, true);
+                }
+
                 // Check if origin is in the whitelist
                 if (allowedOrigins.includes(origin)) {
                     return callback(null, true);
                 }
-                return callback(new Error(`CORS policy: origin ${origin} is not allowed`), false);
+
+                // Check for Vercel preview URLs
+                if (origin.endsWith('.vercel.app') && allowedOrigins.some(o => o.includes('vercel.app'))) {
+                    return callback(null, true);
+                }
+
+                console.warn(`CORS Blocking origin: ${origin}`);
+                // Instead of throwing an error which might cause a 500, we just return false
+                return callback(null, false);
             },
             credentials: true,
             methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
@@ -89,13 +104,14 @@ export default async (req: any, res: any) => {
         await bootstrap();
         server(req, res);
     } catch (err) {
-        console.error('FATAL GATEWAY ERROR:', err);
+        console.error('--- FATAL GATEWAY ERROR ---');
+        console.error(err);
         res.status(500).json({
             success: false,
             statusCode: 500,
             message: 'Internal Server Error (Gateway Crash)',
             error: err.message,
-            stack: process.env.NODE_ENV !== 'production' ? err.stack : undefined,
+            stack: err.stack,
             path: req.url
         });
     }
