@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
-import { RegisterDto, LoginDto, AuthResponse, JwtPayload, UserRole } from '@goride/shared';
+import { RegisterDto, LoginDto, AuthResponse, JwtPayload, UserRole } from '../shared';
 
 @Injectable()
 export class AuthService {

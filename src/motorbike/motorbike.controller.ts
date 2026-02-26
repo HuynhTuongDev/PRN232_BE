@@ -17,7 +17,7 @@ import { MotorbikeService } from './motorbike.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { UserRole, ApiResponse, CreateMotorbikeDto, UpdateMotorbikeDto, MotorbikeFilterDto } from '@goride/shared';
+import { UserRole, ApiResponse, CreateMotorbikeDto, UpdateMotorbikeDto, MotorbikeFilterDto } from '../shared';
 
 @Controller('motorbikes')
 export class MotorbikeController {
@@ -138,3 +138,4 @@ export class MotorbikeController {
         }
     }
 }
+

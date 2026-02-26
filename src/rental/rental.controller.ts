@@ -15,7 +15,7 @@ import { RentalService } from './rental.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { UserRole, ApiResponse, CreateRentalDto, UpdateRentalStatusDto, RentalFilterDto } from '@goride/shared';
+import { UserRole, ApiResponse, CreateRentalDto, UpdateRentalStatusDto, RentalFilterDto } from '../shared';
 
 @Controller('rentals')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -102,3 +102,4 @@ export class RentalController {
         };
     }
 }
+

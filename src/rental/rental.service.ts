@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { calculateDays } from '@goride/shared';
+import { calculateDays } from '../shared';
 
 @Injectable()
 export class RentalService {
@@ -158,3 +158,4 @@ export class RentalService {
         };
     }
 }
+

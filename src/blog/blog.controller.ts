@@ -13,7 +13,7 @@ import {
     UsePipes
 } from '@nestjs/common';
 import { BlogService } from './blog.service';
-import { CreateBlogDto, UpdateBlogDto, ApiResponse, UserRole } from '@goride/shared';
+import { CreateBlogDto, UpdateBlogDto, ApiResponse, UserRole } from '../shared';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -119,3 +119,4 @@ export class BlogController {
         }
     }
 }
+

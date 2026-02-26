@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreatePromotionDto, UpdatePromotionDto } from '@goride/shared';
+import { CreatePromotionDto, UpdatePromotionDto } from '../shared';
 
 @Injectable()
 export class PromotionService {
@@ -54,3 +54,4 @@ export class PromotionService {
         return { success: true, message: 'Xóa chương trình ưu đãi thành công' };
     }
 }
+

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateMotorbikeDto, UpdateMotorbikeDto, MotorbikeFilterDto } from '@goride/shared';
+import { CreateMotorbikeDto, UpdateMotorbikeDto, MotorbikeFilterDto } from '../shared';
 
 @Injectable()
 export class MotorbikeService {
@@ -84,3 +84,4 @@ export class MotorbikeService {
         };
     }
 }
+

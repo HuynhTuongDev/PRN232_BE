@@ -17,7 +17,7 @@ import { UserService } from './user.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { UserRole, ApiResponse } from '@goride/shared';
+import { UserRole, ApiResponse } from '../shared';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -149,3 +149,4 @@ export class UserController {
         }
     }
 }
+

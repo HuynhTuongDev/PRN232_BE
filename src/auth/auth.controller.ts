@@ -11,7 +11,7 @@ import {
   UsePipes
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RegisterDto, LoginDto, RefreshTokenDto, ApiResponse } from '@goride/shared';
+import { RegisterDto, LoginDto, RefreshTokenDto, ApiResponse } from '../shared';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 /**
@@ -137,3 +137,4 @@ export class AuthController {
     };
   }
 }
+

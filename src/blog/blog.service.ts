@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateBlogDto, UpdateBlogDto } from '@goride/shared';
+import { CreateBlogDto, UpdateBlogDto } from '../shared';
 
 @Injectable()
 export class BlogService {
@@ -44,3 +44,4 @@ export class BlogService {
         return { success: true, message: 'Xóa bài viết thành công' };
     }
 }
+
