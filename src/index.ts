@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
@@ -6,6 +7,7 @@ import { ExpressAdapter } from '@nestjs/platform-express';
 import express from 'express';
 
 const server = express();
+server.get('/_health', (req, res) => res.send('OK'));
 
 let app: any;
 
@@ -41,6 +43,15 @@ const bootstrap = async () => {
 };
 
 export default async (req: any, res: any) => {
-    await bootstrap();
-    server(req, res);
+    try {
+        await bootstrap();
+        server(req, res);
+    } catch (err) {
+        console.error('Error during request handling:', err);
+        res.status(500).json({
+            statusCode: 500,
+            message: 'Internal Server Error',
+            error: err.message
+        });
+    }
 };
