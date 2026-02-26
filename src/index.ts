@@ -51,9 +51,25 @@ const bootstrap = async () => {
         app.useGlobalFilters(new GlobalExceptionFilter());
 
         // Enable CORS
+        const allowedOrigins = process.env.CORS_ORIGIN
+            ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
+            : null;
+
         app.enableCors({
-            origin: process.env.CORS_ORIGIN?.split(',') || ['*'],
+            origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean | string) => void) => {
+                // Allow requests with no origin (e.g. mobile apps, curl, Postman)
+                if (!origin) return callback(null, true);
+                // If no whitelist is configured, allow all origins
+                if (!allowedOrigins) return callback(null, true);
+                // Check if origin is in the whitelist
+                if (allowedOrigins.includes(origin)) {
+                    return callback(null, true);
+                }
+                return callback(new Error(`CORS policy: origin ${origin} is not allowed`), false);
+            },
             credentials: true,
+            methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+            allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
         });
 
         // Global prefix
