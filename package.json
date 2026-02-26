@@ -11,7 +11,7 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/src/main",
-    "lint": "eslint \"{src,libs,test}/**/*.ts\" --fix",
+    "lint": "eslint \"{src,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
@@ -85,7 +85,8 @@
     "coverageDirectory": "./coverage",
     "testEnvironment": "node",
     "moduleNameMapper": {
-      "^@goride/shared/(.*)$": "<rootDir>/libs/shared/src/$1"
+      "^@goride/shared/(.*)$": "<rootDir>/src/shared/$1",
+      "^@goride/shared$": "<rootDir>/src/shared"
     }
   },
   "engines": {

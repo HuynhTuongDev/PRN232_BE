@@ -21,10 +21,10 @@
     "noFallthroughCasesInSwitch": false,
     "paths": {
       "@goride/shared": [
-        "libs/shared/src"
+        "src/shared"
       ],
       "@goride/shared/*": [
-        "libs/shared/src/*"
+        "src/shared/*"
       ],
       "@auth/*": [
         "src/auth/*"
@@ -41,8 +41,7 @@
     }
   },
   "include": [
-    "src/**/*",
-    "libs/**/*"
+    "src/**/*"
   ],
   "exclude": [
     "node_modules",
