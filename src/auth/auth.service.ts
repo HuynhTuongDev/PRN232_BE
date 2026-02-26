@@ -84,13 +84,22 @@ export class AuthService {
     }
 
     // Verify password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    console.log(`Checking password for user: ${email}`);
+    let isPasswordValid = false;
+    try {
+      isPasswordValid = await bcrypt.compare(password, user.password);
+    } catch (bcryptError) {
+      console.error('Bcrypt comparison error:', bcryptError);
+      throw new InternalServerErrorException('Lỗi xác thực mật khẩu (Bcrypt)');
+    }
 
     if (!isPasswordValid) {
+      console.log(`Invalid password for user: ${email}`);
       throw new UnauthorizedException('Email hoặc mật khẩu không chính xác');
     }
 
     // Generate tokens
+    console.log(`Generating tokens for user: ${email}`);
     const accessToken = await this.generateAccessToken(user);
     const refreshToken = await this.generateRefreshToken(user);
 

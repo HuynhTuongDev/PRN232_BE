@@ -75,26 +75,28 @@ const bootstrap = async () => {
             allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
         });
 
-        // Global prefix
         const apiPrefix = process.env.API_PREFIX || 'api/v1';
         app.setGlobalPrefix(apiPrefix);
 
+        console.log(`NestJS initialized. ENV CHECK: DB=${!!process.env.DATABASE_URL}, JWT=${!!process.env.JWT_SECRET}`);
         await app.init();
     }
 };
 
 export default async (req: any, res: any) => {
     try {
+        console.log(`Incoming request: ${req.method} ${req.url}`);
         await bootstrap();
         server(req, res);
     } catch (err) {
-        console.error('Fatal Error during request handling:', err);
+        console.error('FATAL GATEWAY ERROR:', err);
         res.status(500).json({
             success: false,
             statusCode: 500,
             message: 'Internal Server Error (Gateway Crash)',
             error: err.message,
-            stack: process.env.NODE_ENV !== 'production' ? err.stack : undefined
+            stack: process.env.NODE_ENV !== 'production' ? err.stack : undefined,
+            path: req.url
         });
     }
 };
