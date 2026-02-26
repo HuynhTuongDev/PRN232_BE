@@ -14,7 +14,8 @@ import { PromotionModule } from './promotion/promotion.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: process.env.NODE_ENV === 'development' ? '.env' : undefined,
+      ignoreEnvFile: process.env.NODE_ENV !== 'development',
     }),
     AuthModule,
     UserModule,
