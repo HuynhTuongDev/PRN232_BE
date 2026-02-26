@@ -6,29 +6,6 @@
             "use": "@vercel/node"
         }
     ],
-    "headers": [
-        {
-            "source": "/(.*)",
-            "headers": [
-                {
-                    "key": "Access-Control-Allow-Credentials",
-                    "value": "true"
-                },
-                {
-                    "key": "Access-Control-Allow-Origin",
-                    "value": "https://prn-232-fe-admin.vercel.app"
-                },
-                {
-                    "key": "Access-Control-Allow-Methods",
-                    "value": "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS"
-                },
-                {
-                    "key": "Access-Control-Allow-Headers",
-                    "value": "Content-Type, Authorization, Accept"
-                }
-            ]
-        }
-    ],
     "routes": [
         {
             "src": "/(.*)",
@@ -38,15 +15,19 @@
             "headers": {
                 "Access-Control-Allow-Origin": "https://prn-232-fe-admin.vercel.app",
                 "Access-Control-Allow-Methods": "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
-                "Access-Control-Allow-Headers": "Content-Type, Authorization, Accept",
-                "Access-Control-Allow-Credentials": "true"
+                "Access-Control-Allow-Headers": "Content-Type, Authorization, Accept, X-Requested-With",
+                "Access-Control-Allow-Credentials": "true",
+                "Access-Control-Max-Age": "86400"
             },
-            "continue": true,
             "status": 204
         },
         {
             "src": "/(.*)",
-            "dest": "src/index.ts"
+            "dest": "src/index.ts",
+            "headers": {
+                "Access-Control-Allow-Origin": "https://prn-232-fe-admin.vercel.app",
+                "Access-Control-Allow-Credentials": "true"
+            }
         }
     ]
 }
