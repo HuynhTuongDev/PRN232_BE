@@ -18,7 +18,12 @@ async function bootstrap() {
 
   // Enable CORS
   app.enableCors({
-    origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:3002', 'http://localhost:3003'],
+    origin: process.env.CORS_ORIGIN?.split(',') || [
+      'http://localhost:3002',
+      'http://localhost:3003',
+      'https://prn-232-fe-admin.vercel.app',
+      'https://prn-232-fe-admin-git-main-huynh-tuongs-projects.vercel.app'
+    ],
     credentials: true,
   });
 
