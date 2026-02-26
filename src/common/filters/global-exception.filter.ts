@@ -37,12 +37,16 @@ export class GlobalExceptionFilter implements ExceptionFilter {
             const res = exception.getResponse();
             message = typeof res === 'object' ? (res as any).message || JSON.stringify(res) : res;
         }
-        // 3. Fallback for other errors
+        // 3. Fallback for Prisma Errors or other errors
         else if (exception.message) {
+            // Check for Prisma specific errors
+            if (exception.message.includes('Prisma') || exception.code?.startsWith('P')) {
+                status = HttpStatus.INTERNAL_SERVER_ERROR;
+                message = `Database Error: ${exception.message.split('\n')[0]}`;
+            }
             // If error message contains gRPC error code, try to extract it
-            if (exception.message.includes('UNKNOWN:') || exception.message.includes('details:')) {
+            else if (exception.message.includes('UNKNOWN:') || exception.message.includes('details:')) {
                 status = HttpStatus.BAD_REQUEST;
-                // Extract message if possible or use full message
                 message = exception.message;
             } else {
                 message = exception.message;

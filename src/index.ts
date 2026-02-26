@@ -26,7 +26,10 @@ server.get('/_health', (req, res) => res.status(200).send('OK'));
 server.get('/_env_check', (req, res) => {
     res.json({
         hasDbUrl: !!process.env.DATABASE_URL,
+        hasJwtSecret: !!process.env.JWT_SECRET,
+        hasJwtRefreshSecret: !!process.env.JWT_REFRESH_SECRET,
         nodeEnv: process.env.NODE_ENV,
+        apiPrefix: process.env.API_PREFIX,
         timestamp: new Date().toISOString()
     });
 });
@@ -85,11 +88,13 @@ export default async (req: any, res: any) => {
         await bootstrap();
         server(req, res);
     } catch (err) {
-        console.error('Error during request handling:', err);
+        console.error('Fatal Error during request handling:', err);
         res.status(500).json({
+            success: false,
             statusCode: 500,
-            message: 'Internal Server Error',
-            error: err.message
+            message: 'Internal Server Error (Gateway Crash)',
+            error: err.message,
+            stack: process.env.NODE_ENV !== 'production' ? err.stack : undefined
         });
     }
 };
