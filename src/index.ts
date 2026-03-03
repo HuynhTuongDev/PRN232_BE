@@ -56,7 +56,12 @@ const bootstrap = async () => {
         // Enable CORS
         const allowedOrigins = process.env.CORS_ORIGIN
             ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
-            : null;
+            : [
+                'http://localhost:3002',
+                'http://localhost:3003',
+                'https://prn-232-fe-admin.vercel.app',
+                'https://prn-232-fe-admin-git-main-huynh-tuongs-projects.vercel.app'
+            ];
 
         app.enableCors({
             origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean | string) => void) => {
