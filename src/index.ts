@@ -76,6 +76,11 @@ const bootstrap = async () => {
                     return callback(null, true);
                 }
 
+                // Always allow local development URLs
+                if (origin === 'http://localhost:3002' || origin === 'http://localhost:3003') {
+                    return callback(null, true);
+                }
+
                 // Check if origin is in the whitelist
                 if (allowedOrigins.includes(origin)) {
                     return callback(null, true);
