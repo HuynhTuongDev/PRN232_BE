@@ -13,7 +13,7 @@
                 "OPTIONS"
             ],
             "headers": {
-                "Access-Control-Allow-Origin": "https://prn-232-fe-admin.vercel.app",
+                "Access-Control-Allow-Origin": "https://prn-232-fe-admin.vercel.app , http://localhost:3002",
                 "Access-Control-Allow-Methods": "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
                 "Access-Control-Allow-Headers": "Content-Type, Authorization, Accept, X-Requested-With",
                 "Access-Control-Allow-Credentials": "true",
