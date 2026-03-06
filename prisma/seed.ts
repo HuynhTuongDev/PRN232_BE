@@ -1,19 +1,17 @@
-
-import { PrismaClient, UserRole, MotorbikeType, MotorbikeStatus } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import { PrismaClient, MotorbikeType, MotorbikeStatus } from '@prisma/client';
+import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
 async function main() {
     console.log('Seed started...');
 
-    // 1. Clear existing data
+    // 1. Clear existing data (không xóa promotions để tránh lỗi schema DB)
     await prisma.review.deleteMany();
     await prisma.payment.deleteMany();
     await prisma.rental.deleteMany();
     await prisma.motorbike.deleteMany();
     await prisma.blog.deleteMany();
-    await prisma.promotion.deleteMany();
     await prisma.user.deleteMany();
 
     // 2. Create Users
@@ -105,8 +103,10 @@ async function main() {
         },
     ];
 
+    const createdMotorbikes: any[] = [];
     for (const motorbike of motorbikes) {
-        await prisma.motorbike.create({ data: motorbike });
+        const m = await prisma.motorbike.create({ data: motorbike });
+        createdMotorbikes.push(m);
     }
 
     // 4. Create Blogs
@@ -131,30 +131,33 @@ async function main() {
         await prisma.blog.create({ data: blog });
     }
 
-    // 5. Create Promotions
-    const promotions = [
-        {
-            badge: '20% OFF',
-            title: 'Chào bạn mới',
-            description: 'Giảm ngay 20% cho chuyến đi đầu tiên',
-            image: 'https://images.unsplash.com/photo-1616634375264-2d2e17736a36',
+    // 5. Create a test Rental for payment testing
+    const testMotorbike = createdMotorbikes[0]; // Honda Wave RSX - 150,000/day
+    const rental = await prisma.rental.create({
+        data: {
+            userId: customer.id,
+            motorbikeId: testMotorbike.id,
+            startDate: new Date('2026-03-10'),
+            endDate: new Date('2026-03-12'),
+            pickupLocation: 'Hoàn Kiếm, Hà Nội',
+            returnLocation: 'Sân bay Nội Bài',
+            totalPrice: 300000, // 2 days * 150,000
+            numberOfDays: 2,
+            status: 'PENDING',
         },
-        {
-            badge: '15% OFF',
-            title: 'Cuối tuần rực rỡ',
-            description: 'Thuê xe cuối tuần, nhận ưu đãi hấp dẫn',
-            image: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8df0',
-        },
-    ];
-
-    for (const promo of promotions) {
-        await prisma.promotion.create({ data: promo });
-    }
+    });
 
     console.log('Motorbikes created:', motorbikes.length);
     console.log('Blogs created:', blogs.length);
-    console.log('Promotions created:', promotions.length);
-    console.log('Seed completed successfully!');
+    console.log('\n============================');
+    console.log('✅ Seed completed successfully!');
+    console.log('============================');
+    console.log('📧 Admin:    admin@goride.com / 123456');
+    console.log('📧 Customer: customer@gmail.com / 123456');
+    console.log('');
+    console.log('🛵 Test Rental ID for payment API:');
+    console.log('   rentalId =', rental.id);
+    console.log('============================\n');
 }
 
 main()

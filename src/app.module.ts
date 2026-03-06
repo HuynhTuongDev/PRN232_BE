@@ -9,6 +9,7 @@ import { RentalModule } from './rental/rental.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { BlogModule } from './blog/blog.module';
 import { PromotionModule } from './promotion/promotion.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { PromotionModule } from './promotion/promotion.module';
     PrismaModule,
     BlogModule,
     PromotionModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
