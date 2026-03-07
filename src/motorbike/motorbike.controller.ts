@@ -157,16 +157,31 @@ export class MotorbikeController {
         @UploadedFiles() files: Express.Multer.File[]
     ): Promise<ApiResponse> {
         try {
-            // Upload new images to Supabase if any
+            // Lấy thông tin xe cũ để lấy danh sách ảnh
+            const { motorbike: oldMotorbike } = await this.motorbikeService.findById(id);
+
+            // Nếu có upload file mới từ máy tính
             if (files && files.length > 0) {
+                // Upload ảnh mới
                 const uploadPromises = files.map(file =>
                     this.supabaseService.uploadImage(file, undefined, 'motorbikes')
                 );
                 const urls = await Promise.all(uploadPromises);
 
-                // Nếu Frontend gửi lên mảng ảnh cũ, chúng ta nối thêm ảnh mới vào
-                // Nếu không, chúng ta chỉ lấy ảnh mới
-                updateDto.images = [...(updateDto.images || []), ...urls];
+                // THAY THẾ HOÀN TOÀN: Chỉ lấy các ảnh vừa upload mới
+                updateDto.images = urls;
+
+                // XÓA ẢNH CŨ TRÊN SUPABASE (nếu là link của mình)
+                if (oldMotorbike.images && Array.isArray(oldMotorbike.images)) {
+                    for (const oldUrl of oldMotorbike.images) {
+                        if (oldUrl.includes('supabase.co')) {
+                            await this.supabaseService.deleteImage(oldUrl, 'images');
+                        }
+                    }
+                }
+            } else if (updateDto.images && typeof updateDto.images === 'string') {
+                // Nếu không upload file mà chỉ gửi link text
+                updateDto.images = [updateDto.images];
             }
 
             const result: { motorbike: any } = await this.motorbikeService.update(id, updateDto);
@@ -192,7 +207,21 @@ export class MotorbikeController {
     @HttpCode(HttpStatus.OK)
     async remove(@Param('id') id: string): Promise<ApiResponse> {
         try {
+            // Lấy thông tin xe trước khi xóa để lấy link ảnh
+            const { motorbike } = await this.motorbikeService.findById(id);
+
+            // Xóa record trong DB
             const result: { message: string } = await this.motorbikeService.delete(id);
+
+            // Nếu xóa DB thành công, tiến hành xóa ảnh trên Supabase
+            if (motorbike.images && Array.isArray(motorbike.images)) {
+                for (const url of motorbike.images) {
+                    if (url.includes('supabase.co')) {
+                        await this.supabaseService.deleteImage(url, 'images');
+                    }
+                }
+            }
+
             return {
                 success: true,
                 message: result.message,

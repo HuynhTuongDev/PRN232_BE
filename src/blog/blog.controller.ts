@@ -111,13 +111,21 @@ export class BlogController {
     @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
     async update(
         @Param('id') id: string,
+        @UploadedFile() file: Express.Multer.File,
         @Body() updateBlogDto: UpdateBlogDto,
-        @UploadedFile() file: Express.Multer.File
     ): Promise<ApiResponse> {
         try {
+            // Lấy thông tin blog cũ
+            const { blog: oldBlog } = await this.blogService.findById(id);
+
             if (file) {
                 const url = await this.supabaseService.uploadImage(file, undefined, 'blogs');
                 updateBlogDto.image = url;
+
+                // Xóa ảnh cũ trên Supabase nếu có
+                if (oldBlog.image && oldBlog.image.includes('supabase.co')) {
+                    await this.supabaseService.deleteImage(oldBlog.image, 'images');
+                }
             }
             // Nếu không có file và cũng không có image trong body, giữ nguyên ảnh cũ (Prisma sẽ lo việc này)
 
@@ -130,7 +138,7 @@ export class BlogController {
         } catch (error) {
             return {
                 success: false,
-                error: error.message || 'Cập nhật bài viết thất bại',
+                error: error.details || error.message || 'Cập nhật bài viết thất bại',
             };
         }
     }
@@ -141,7 +149,16 @@ export class BlogController {
     @HttpCode(HttpStatus.OK)
     async remove(@Param('id') id: string): Promise<ApiResponse> {
         try {
+            // Lấy thông tin blog trước khi xóa
+            const { blog } = await this.blogService.findById(id);
+
             const result = await this.blogService.delete(id);
+
+            // Nếu xóa DB thành công, xóa ảnh trên Supabase
+            if (blog.image && blog.image.includes('supabase.co')) {
+                await this.supabaseService.deleteImage(blog.image, 'images');
+            }
+
             return {
                 success: true,
                 message: result.message,
@@ -149,9 +166,8 @@ export class BlogController {
         } catch (error) {
             return {
                 success: false,
-                error: error.message || 'Xóa bài viết thất bại',
+                error: error.details || error.message || 'Xóa bài viết thất bại',
             };
         }
     }
 }
-
