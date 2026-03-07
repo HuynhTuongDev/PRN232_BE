@@ -7,9 +7,12 @@ export class SupabaseService {
     private readonly supabase: SupabaseClient;
     private readonly logger = new Logger(SupabaseService.name);
 
+    private readonly bucket: string;
+
     constructor(private readonly configService: ConfigService) {
         const supabaseUrl = this.configService.get<string>('SUPABASE_URL');
         const supabaseKey = this.configService.get<string>('SUPABASE_KEY');
+        this.bucket = this.configService.get<string>('SUPABASE_BUCKET') || 'images';
 
         if (!supabaseUrl || !supabaseKey) {
             this.logger.error('SUPABASE_URL or SUPABASE_KEY is missing in env');
@@ -25,7 +28,8 @@ export class SupabaseService {
      * @param bucket Lowercase bucket name (default: 'images')
      * @param folder Optional folder path inside the bucket
      */
-    async uploadImage(file: Express.Multer.File, bucket: string = 'images', folder: string = ''): Promise<string> {
+    async uploadImage(file: Express.Multer.File, bucket?: string, folder: string = ''): Promise<string> {
+        const targetBucket = bucket || this.bucket;
         if (!file) {
             throw new BadRequestException('No file provided');
         }
@@ -35,7 +39,7 @@ export class SupabaseService {
         const fileName = `${folder ? folder + '/' : ''}${Date.now()}-${Math.random().toString(36).substring(2, 10)}.${fileExt}`;
 
         const { data, error } = await this.supabase.storage
-            .from(bucket)
+            .from(targetBucket)
             .upload(fileName, file.buffer, {
                 contentType: file.mimetype,
                 upsert: false,
@@ -48,7 +52,7 @@ export class SupabaseService {
 
         // Get Public URL
         const { data: publicUrlData } = this.supabase.storage
-            .from(bucket)
+            .from(targetBucket)
             .getPublicUrl(fileName);
 
         if (!publicUrlData) {

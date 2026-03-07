@@ -25,7 +25,7 @@ export class UploadController {
             throw new BadRequestException('Only image files are allowed');
         }
 
-        const url = await this.supabaseService.uploadImage(file);
+        const url = await this.supabaseService.uploadImage(file, undefined, 'motorbikes');
         return { url };
     }
 
@@ -40,7 +40,7 @@ export class UploadController {
             if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
                 throw new BadRequestException(`File ${file.originalname} is not an image`);
             }
-            return this.supabaseService.uploadImage(file);
+            return this.supabaseService.uploadImage(file, undefined, 'motorbikes');
         });
 
         const urls = await Promise.all(uploadPromises);
