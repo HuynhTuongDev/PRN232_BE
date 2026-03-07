@@ -29,6 +29,8 @@ model User {
   phone     String?
   address   String?
   role      UserRole @default(CUSTOMER)
+  membershipTier String?  // Hạng thành viên
+  points         Int      @default(0) // Điểm tích lũy
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
