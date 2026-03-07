@@ -109,15 +109,24 @@ export class PromotionController {
     @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
     async update(
         @Param('id') id: string,
-        @Body() dto: UpdatePromotionDto,
-        @UploadedFile() file: Express.Multer.File
+        @UploadedFile() file: Express.Multer.File,
+        @Body() updatePromotionDto: UpdatePromotionDto,
     ): Promise<ApiResponse> {
         try {
+            // Lấy thông tin cũ
+            const { promotion: oldPromo } = await this.promotionService.findById(id);
+
             if (file) {
                 const url = await this.supabaseService.uploadImage(file, undefined, 'promotions');
-                dto.image = url;
+                updatePromotionDto.image = url;
+
+                // Xóa ảnh cũ trên Supabase
+                if (oldPromo.image && oldPromo.image.includes('supabase.co')) {
+                    await this.supabaseService.deleteImage(oldPromo.image, 'images');
+                }
             }
-            const result = await this.promotionService.update(id, dto);
+
+            const result = await this.promotionService.update(id, updatePromotionDto);
             return {
                 success: true,
                 data: result.promotion,
@@ -126,7 +135,7 @@ export class PromotionController {
         } catch (error) {
             return {
                 success: false,
-                error: error.message || 'Cập nhật chương trình ưu đãi thất bại',
+                error: error.details || error.message || 'Cập nhật chương trình ưu đãi thất bại',
             };
         }
     }
@@ -137,7 +146,16 @@ export class PromotionController {
     @HttpCode(HttpStatus.OK)
     async remove(@Param('id') id: string): Promise<ApiResponse> {
         try {
+            // Lấy thông tin trước khi xóa
+            const { promotion } = await this.promotionService.findById(id);
+
             const result = await this.promotionService.delete(id);
+
+            // Xóa ảnh trên Supabase
+            if (promotion.image && promotion.image.includes('supabase.co')) {
+                await this.supabaseService.deleteImage(promotion.image, 'images');
+            }
+
             return {
                 success: true,
                 message: result.message,
@@ -145,9 +163,8 @@ export class PromotionController {
         } catch (error) {
             return {
                 success: false,
-                error: error.message || 'Xóa chương trình ưu đãi thất bại',
+                error: error.details || error.message || 'Xóa chương trình ưu đãi thất bại',
             };
         }
     }
 }
-
