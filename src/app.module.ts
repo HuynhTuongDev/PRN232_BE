@@ -10,6 +10,8 @@ import { PrismaModule } from './prisma/prisma.module';
 import { BlogModule } from './blog/blog.module';
 import { PromotionModule } from './promotion/promotion.module';
 import { PaymentModule } from './payment/payment.module';
+import { SupabaseModule } from './shared/supabase/supabase.module';
+import { UploadModule } from './shared/upload/upload.module';
 
 @Module({
   imports: [
@@ -26,6 +28,8 @@ import { PaymentModule } from './payment/payment.module';
     BlogModule,
     PromotionModule,
     PaymentModule,
+    SupabaseModule,
+    UploadModule,
   ],
   controllers: [AppController],
   providers: [AppService],
