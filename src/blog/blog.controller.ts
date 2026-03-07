@@ -68,7 +68,9 @@ export class BlogController {
     @Post()
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(UserRole.ADMIN)
-    @UseInterceptors(FileInterceptor('file'))
+    @UseInterceptors(FileInterceptor('file', {
+        limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+    }))
     @HttpCode(HttpStatus.CREATED)
     @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
     async create(

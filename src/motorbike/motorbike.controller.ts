@@ -78,7 +78,9 @@ export class MotorbikeController {
     @Post()
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(UserRole.ADMIN)
-    @UseInterceptors(FilesInterceptor('files', 10))
+    @UseInterceptors(FilesInterceptor('files', 10, {
+        limits: { fileSize: 5 * 1024 * 1024 } // 5MB per file
+    }))
     @HttpCode(HttpStatus.CREATED)
     @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
     async create(
