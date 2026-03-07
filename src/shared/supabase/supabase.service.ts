@@ -45,8 +45,10 @@ export class SupabaseService {
                 upsert: false,
             });
 
+        this.logger.log(`Supabase upload result - bucket: ${targetBucket}, fileName: ${fileName}`);
+        if (data) this.logger.log(`Upload successful: ${JSON.stringify(data)}`);
         if (error) {
-            this.logger.error(`Error uploading image to Supabase: ${error.message}`);
+            this.logger.error(`Error uploading image to Supabase: ${JSON.stringify(error)}`);
             throw new BadRequestException(`Image upload failed: ${error.message}`);
         }
 
