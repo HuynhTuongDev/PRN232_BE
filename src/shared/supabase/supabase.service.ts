@@ -38,6 +38,8 @@ export class SupabaseService {
         const fileExt = file.originalname.split('.').pop();
         const fileName = `${folder ? folder + '/' : ''}${Date.now()}-${Math.random().toString(36).substring(2, 10)}.${fileExt}`;
 
+        this.logger.log(`Bắt đầu upload file: ${fileName} vào bucket: ${targetBucket}`);
+
         const { data, error } = await this.supabase.storage
             .from(targetBucket)
             .upload(fileName, file.buffer, {
@@ -45,12 +47,13 @@ export class SupabaseService {
                 upsert: false,
             });
 
-        this.logger.log(`Supabase upload result - bucket: ${targetBucket}, fileName: ${fileName}`);
-        if (data) this.logger.log(`Upload successful: ${JSON.stringify(data)}`);
         if (error) {
-            this.logger.error(`Error uploading image to Supabase: ${JSON.stringify(error)}`);
+            this.logger.error(`LỰC UPLOAD THẤT BẠI: ${error.message} - Chi tiết: ${JSON.stringify(error)}`);
             throw new BadRequestException(`Image upload failed: ${error.message}`);
         }
+
+        this.logger.log(`UPLOAD THÀNH CÔNG: ${fileName}`);
+        if (data) this.logger.log(`Upload successful: ${JSON.stringify(data)}`);
 
         // Get Public URL
         const { data: publicUrlData } = this.supabase.storage

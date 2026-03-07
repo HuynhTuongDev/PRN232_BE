@@ -132,6 +132,9 @@ export class MotorbikeController {
                     this.supabaseService.uploadImage(file, undefined, 'motorbikes')
                 );
                 const urls = await Promise.all(uploadPromises);
+
+                // Nếu Frontend gửi lên mảng ảnh cũ, chúng ta nối thêm ảnh mới vào
+                // Nếu không, chúng ta chỉ lấy ảnh mới
                 updateDto.images = [...(updateDto.images || []), ...urls];
             }
 

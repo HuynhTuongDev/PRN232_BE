@@ -119,6 +119,8 @@ export class BlogController {
                 const url = await this.supabaseService.uploadImage(file, undefined, 'blogs');
                 updateBlogDto.image = url;
             }
+            // Nếu không có file và cũng không có image trong body, giữ nguyên ảnh cũ (Prisma sẽ lo việc này)
+
             const result = await this.blogService.update(id, updateBlogDto);
             return {
                 success: true,
