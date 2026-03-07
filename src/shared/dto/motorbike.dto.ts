@@ -96,6 +96,16 @@ export class UpdateMotorbikeDto {
     @IsString()
     @IsOptional()
     engineSize?: string;
+
+    @IsString()
+    @IsOptional()
+    @MaxLength(20)
+    licensePlate?: string;
+
+    @IsNumber()
+    @IsOptional()
+    @Min(1900)
+    year?: number;
 }
 
 /**
