@@ -10,9 +10,9 @@ export class CreatePromotionDto {
     @IsNotEmpty({ message: 'Mô tả không được để trống' })
     description: string;
 
+    @IsOptional()
     @IsUrl({}, { message: 'Đường dẫn hình ảnh không hợp lệ' })
-    @IsNotEmpty({ message: 'Hình ảnh không được để trống' })
-    image: string;
+    image?: string;
 
     @IsOptional()
     @IsString({ message: 'Nhãn phải là chuỗi ký tự' })

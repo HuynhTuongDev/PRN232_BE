@@ -11,17 +11,24 @@ import {
     HttpCode,
     HttpStatus,
     ValidationPipe,
-    UsePipes
+    UsePipes,
+    UseInterceptors,
+    UploadedFiles,
 } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { MotorbikeService } from './motorbike.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole, ApiResponse, CreateMotorbikeDto, UpdateMotorbikeDto, MotorbikeFilterDto } from '../shared';
+import { SupabaseService } from '../shared/supabase/supabase.service';
 
 @Controller('motorbikes')
 export class MotorbikeController {
-    constructor(private readonly motorbikeService: MotorbikeService) { }
+    constructor(
+        private readonly motorbikeService: MotorbikeService,
+        private readonly supabaseService: SupabaseService
+    ) { }
 
     /**
      * Search and list motorbikes (Public)
@@ -71,10 +78,23 @@ export class MotorbikeController {
     @Post()
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(UserRole.ADMIN)
+    @UseInterceptors(FilesInterceptor('files', 10))
     @HttpCode(HttpStatus.CREATED)
     @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-    async create(@Body() createDto: CreateMotorbikeDto): Promise<ApiResponse> {
+    async create(
+        @Body() createDto: CreateMotorbikeDto,
+        @UploadedFiles() files: Express.Multer.File[]
+    ): Promise<ApiResponse> {
         try {
+            // Upload images to Supabase if any
+            if (files && files.length > 0) {
+                const uploadPromises = files.map(file =>
+                    this.supabaseService.uploadImage(file, undefined, 'motorbikes')
+                );
+                const urls = await Promise.all(uploadPromises);
+                createDto.images = [...(createDto.images || []), ...urls];
+            }
+
             const result: { motorbike: any } = await this.motorbikeService.create(createDto);
             return {
                 success: true,
@@ -95,13 +115,24 @@ export class MotorbikeController {
     @Put(':id')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(UserRole.ADMIN)
+    @UseInterceptors(FilesInterceptor('files', 10))
     @HttpCode(HttpStatus.OK)
     @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
     async update(
         @Param('id') id: string,
         @Body() updateDto: UpdateMotorbikeDto,
+        @UploadedFiles() files: Express.Multer.File[]
     ): Promise<ApiResponse> {
         try {
+            // Upload new images to Supabase if any
+            if (files && files.length > 0) {
+                const uploadPromises = files.map(file =>
+                    this.supabaseService.uploadImage(file, undefined, 'motorbikes')
+                );
+                const urls = await Promise.all(uploadPromises);
+                updateDto.images = [...(updateDto.images || []), ...urls];
+            }
+
             const result: { motorbike: any } = await this.motorbikeService.update(id, updateDto);
             return {
                 success: true,
