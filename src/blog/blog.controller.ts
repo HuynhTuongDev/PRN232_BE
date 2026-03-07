@@ -10,17 +10,24 @@ import {
     HttpCode,
     HttpStatus,
     ValidationPipe,
-    UsePipes
+    UsePipes,
+    UseInterceptors,
+    UploadedFile
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { BlogService } from './blog.service';
 import { CreateBlogDto, UpdateBlogDto, ApiResponse, UserRole } from '../shared';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { SupabaseService } from '../shared/supabase/supabase.service';
 
 @Controller('blogs')
 export class BlogController {
-    constructor(private readonly blogService: BlogService) { }
+    constructor(
+        private readonly blogService: BlogService,
+        private readonly supabaseService: SupabaseService
+    ) { }
 
     @Get()
     @HttpCode(HttpStatus.OK)
@@ -61,10 +68,25 @@ export class BlogController {
     @Post()
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(UserRole.ADMIN)
+    @UseInterceptors(FileInterceptor('file'))
     @HttpCode(HttpStatus.CREATED)
     @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-    async create(@Body() createBlogDto: CreateBlogDto): Promise<ApiResponse> {
+    async create(
+        @Body() createBlogDto: CreateBlogDto,
+        @UploadedFile() file: Express.Multer.File
+    ): Promise<ApiResponse> {
         try {
+            if (!file && !createBlogDto.image) {
+                return {
+                    success: false,
+                    error: 'Vui lòng cung cấp hình ảnh hoặc tải lên tập tin',
+                };
+            }
+
+            if (file) {
+                const url = await this.supabaseService.uploadImage(file, undefined, 'blogs');
+                createBlogDto.image = url;
+            }
             const result = await this.blogService.create(createBlogDto);
             return {
                 success: true,
@@ -82,10 +104,19 @@ export class BlogController {
     @Put(':id')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(UserRole.ADMIN)
+    @UseInterceptors(FileInterceptor('file'))
     @HttpCode(HttpStatus.OK)
     @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-    async update(@Param('id') id: string, @Body() updateBlogDto: UpdateBlogDto): Promise<ApiResponse> {
+    async update(
+        @Param('id') id: string,
+        @Body() updateBlogDto: UpdateBlogDto,
+        @UploadedFile() file: Express.Multer.File
+    ): Promise<ApiResponse> {
         try {
+            if (file) {
+                const url = await this.supabaseService.uploadImage(file, undefined, 'blogs');
+                updateBlogDto.image = url;
+            }
             const result = await this.blogService.update(id, updateBlogDto);
             return {
                 success: true,

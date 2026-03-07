@@ -10,17 +10,24 @@ import {
     HttpCode,
     HttpStatus,
     ValidationPipe,
-    UsePipes
+    UsePipes,
+    UseInterceptors,
+    UploadedFile
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { PromotionService } from './promotion.service';
 import { CreatePromotionDto, UpdatePromotionDto, ApiResponse, UserRole } from '../shared';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { SupabaseService } from '../shared/supabase/supabase.service';
 
 @Controller('promotions')
 export class PromotionController {
-    constructor(private readonly promotionService: PromotionService) { }
+    constructor(
+        private readonly promotionService: PromotionService,
+        private readonly supabaseService: SupabaseService
+    ) { }
 
     @Get()
     @HttpCode(HttpStatus.OK)
@@ -61,10 +68,25 @@ export class PromotionController {
     @Post()
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(UserRole.ADMIN)
+    @UseInterceptors(FileInterceptor('file'))
     @HttpCode(HttpStatus.CREATED)
     @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-    async create(@Body() dto: CreatePromotionDto): Promise<ApiResponse> {
+    async create(
+        @Body() dto: CreatePromotionDto,
+        @UploadedFile() file: Express.Multer.File
+    ): Promise<ApiResponse> {
         try {
+            if (!file && !dto.image) {
+                return {
+                    success: false,
+                    error: 'Vui lòng cung cấp hình ảnh hoặc tải lên tập tin',
+                };
+            }
+
+            if (file) {
+                const url = await this.supabaseService.uploadImage(file, undefined, 'promotions');
+                dto.image = url;
+            }
             const result = await this.promotionService.create(dto);
             return {
                 success: true,
@@ -82,10 +104,19 @@ export class PromotionController {
     @Put(':id')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(UserRole.ADMIN)
+    @UseInterceptors(FileInterceptor('file'))
     @HttpCode(HttpStatus.OK)
     @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-    async update(@Param('id') id: string, @Body() dto: UpdatePromotionDto): Promise<ApiResponse> {
+    async update(
+        @Param('id') id: string,
+        @Body() dto: UpdatePromotionDto,
+        @UploadedFile() file: Express.Multer.File
+    ): Promise<ApiResponse> {
         try {
+            if (file) {
+                const url = await this.supabaseService.uploadImage(file, undefined, 'promotions');
+                dto.image = url;
+            }
             const result = await this.promotionService.update(id, dto);
             return {
                 success: true,

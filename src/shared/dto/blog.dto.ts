@@ -15,9 +15,9 @@ export class CreateBlogDto {
     @IsNotEmpty({ message: 'Nội dung không được để trống' })
     content: string;
 
+    @IsOptional()
     @IsUrl({}, { message: 'Đường dẫn hình ảnh không hợp lệ' })
-    @IsNotEmpty({ message: 'Hình ảnh không được để trống' })
-    image: string;
+    image?: string;
 
     @IsOptional()
     @IsString({ message: 'Thẻ phải là chuỗi ký tự' })
