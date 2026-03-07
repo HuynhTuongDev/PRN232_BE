@@ -14,7 +14,13 @@ import {
     UsePipes,
     UseInterceptors,
     UploadedFiles,
+    UseFilters,
+    Injectable,
+    NestInterceptor,
+    ExecutionContext,
+    CallHandler
 } from '@nestjs/common';
+import { Observable } from 'rxjs';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { MotorbikeService } from './motorbike.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -22,6 +28,33 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole, ApiResponse, CreateMotorbikeDto, UpdateMotorbikeDto, MotorbikeFilterDto } from '../shared';
 import { SupabaseService } from '../shared/supabase/supabase.service';
+
+@Injectable()
+export class ParseFormDataInterceptor implements NestInterceptor {
+    intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+        const request = context.switchToHttp().getRequest();
+        if (request.body) {
+            if (request.body.pricePerDay) {
+                request.body.pricePerDay = parseFloat(request.body.pricePerDay);
+            }
+            if (request.body.year) {
+                request.body.year = parseInt(request.body.year);
+            }
+            if (request.body.images && typeof request.body.images === 'string') {
+                request.body.images = [request.body.images];
+            }
+            // NestJS/Multer sometimes puts multiple 'images' fields as an array automatically
+            // but we need to ensure it's handled if it's 'images[]' in FormData
+            if (request.body['images[]']) {
+                request.body.images = Array.isArray(request.body['images[]'])
+                    ? request.body['images[]']
+                    : [request.body['images[]']];
+                delete request.body['images[]'];
+            }
+        }
+        return next.handle();
+    }
+}
 
 @Controller('motorbikes')
 export class MotorbikeController {
@@ -78,9 +111,7 @@ export class MotorbikeController {
     @Post()
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(UserRole.ADMIN)
-    @UseInterceptors(FilesInterceptor('files', 10, {
-        limits: { fileSize: 5 * 1024 * 1024 } // 5MB per file
-    }))
+    @UseInterceptors(FilesInterceptor('files', 10), ParseFormDataInterceptor)
     @HttpCode(HttpStatus.CREATED)
     @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
     async create(
@@ -117,7 +148,7 @@ export class MotorbikeController {
     @Put(':id')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(UserRole.ADMIN)
-    @UseInterceptors(FilesInterceptor('files', 10))
+    @UseInterceptors(FilesInterceptor('files', 10), ParseFormDataInterceptor)
     @HttpCode(HttpStatus.OK)
     @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
     async update(
