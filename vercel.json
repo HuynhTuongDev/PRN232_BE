@@ -9,13 +9,6 @@
     "routes": [
         {
             "src": "/(.*)",
-            "methods": [
-                "OPTIONS"
-            ],
-            "status": 204
-        },
-        {
-            "src": "/(.*)",
             "dest": "src/index.ts"
         }
     ]

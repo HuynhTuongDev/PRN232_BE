@@ -19,15 +19,10 @@ async function bootstrap() {
 
   // Enable CORS
   app.enableCors({
-    origin: [
-      'http://localhost:3002',
-      'http://localhost:3003',
-      'https://prn-232-fe-admin.vercel.app',
-      'https://prn-232-fe-admin-git-main-huynh-tuongs-projects.vercel.app'
-    ],
+    origin: true,
     credentials: true,
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With', 'Origin'],
   });
 
   // Global prefix
