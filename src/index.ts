@@ -3,16 +3,6 @@ import { register } from 'tsconfig-paths';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
-// Load and register aliases from tsconfig.json
-try {
-    const tsconfig = JSON.parse(readFileSync(join(process.cwd(), 'tsconfig.json'), 'utf8'));
-    register({
-        baseUrl: './',
-        paths: tsconfig.compilerOptions.paths,
-    });
-} catch (e) {
-    console.warn('Could not register path aliases:', e.message);
-}
 
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
@@ -22,46 +12,6 @@ import { ExpressAdapter } from '@nestjs/platform-express';
 import express from 'express';
 
 const server = express();
-server.get('/health', (req, res) => res.status(200).send('OK'));
-server.get('/env-check', (req, res) => {
-    res.json({
-        hasDbUrl: !!process.env.DATABASE_URL,
-        hasJwtSecret: !!process.env.JWT_SECRET,
-        hasJwtRefreshSecret: !!process.env.JWT_REFRESH_SECRET,
-        nodeEnv: process.env.NODE_ENV,
-        apiPrefix: process.env.API_PREFIX,
-        timestamp: new Date().toISOString()
-    });
-});
-// Explicit OPTIONS handler for CORS preflight requests
-server.options('*', (req, res) => {
-    const allowedOrigins = process.env.CORS_ORIGIN
-        ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
-        : [
-            'http://localhost:3002',
-            'http://localhost:3003',
-            'https://prn-232-fe-admin.vercel.app',
-            'https://prn-232-fe-admin-git-main-huynh-tuongs-projects.vercel.app'
-        ];
-    const origin = req.headers.origin;
-    let allowOrigin = '';
-    if (!origin) {
-        allowOrigin = '*';
-    } else if (
-        allowedOrigins.includes('*') ||
-        allowedOrigins.includes(origin) ||
-        origin === 'http://localhost:3002' ||
-        origin === 'http://localhost:3003' ||
-        (origin.endsWith('.vercel.app') && allowedOrigins.some(o => o.includes('vercel.app')))
-    ) {
-        allowOrigin = origin;
-    }
-    res.setHeader('Access-Control-Allow-Origin', allowOrigin);
-    res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept, X-Requested-With');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.status(204).end();
-});
 
 let app: any;
 
@@ -83,48 +33,14 @@ const bootstrap = async () => {
         // Standardize error responses
         app.useGlobalFilters(new GlobalExceptionFilter());
 
-        // Enable CORS
-        const allowedOrigins = process.env.CORS_ORIGIN
-            ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
-            : [
+        // Enable CORS đơn giản
+        app.enableCors({
+            origin: [
                 'http://localhost:3002',
                 'http://localhost:3003',
                 'https://prn-232-fe-admin.vercel.app',
                 'https://prn-232-fe-admin-git-main-huynh-tuongs-projects.vercel.app'
-            ];
-
-        app.enableCors({
-            origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean | string) => void) => {
-                console.log(`CORS Check - Origin: ${origin}`);
-                console.log(`CORS Check - Allowed: ${JSON.stringify(allowedOrigins)}`);
-
-                // Allow requests with no origin (e.g. mobile apps, curl, Postman)
-                if (!origin) return callback(null, true);
-
-                // If no whitelist is configured, allow all
-                if (!allowedOrigins || allowedOrigins.length === 0 || allowedOrigins.includes('*')) {
-                    return callback(null, true);
-                }
-
-                // Always allow local development URLs
-                if (origin === 'http://localhost:3002' || origin === 'http://localhost:3003') {
-                    return callback(null, true);
-                }
-
-                // Check if origin is in the whitelist
-                if (allowedOrigins.includes(origin)) {
-                    return callback(null, true);
-                }
-
-                // Check for Vercel preview URLs
-                if (origin.endsWith('.vercel.app') && allowedOrigins.some(o => o.includes('vercel.app'))) {
-                    return callback(null, true);
-                }
-
-                console.warn(`CORS Blocking origin: ${origin}`);
-                // Instead of throwing an error which might cause a 500, we just return false
-                return callback(null, false);
-            },
+            ],
             credentials: true,
             methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
             allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
@@ -138,40 +54,12 @@ const bootstrap = async () => {
     }
 };
 
+
 export default async (req: any, res: any) => {
     try {
-        console.log(`Incoming request: ${req.method} ${req.url}`);
         await bootstrap();
-        // Set CORS headers cho mọi request
-        const allowedOrigins = process.env.CORS_ORIGIN
-            ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
-            : [
-                'http://localhost:3002',
-                'http://localhost:3003',
-                'https://prn-232-fe-admin.vercel.app',
-                'https://prn-232-fe-admin-git-main-huynh-tuongs-projects.vercel.app'
-            ];
-        const origin = req.headers.origin;
-        let allowOrigin = '';
-        if (!origin) {
-            allowOrigin = '*';
-        } else if (
-            allowedOrigins.includes('*') ||
-            allowedOrigins.includes(origin) ||
-            origin === 'http://localhost:3002' ||
-            origin === 'http://localhost:3003' ||
-            (origin.endsWith('.vercel.app') && allowedOrigins.some(o => o.includes('vercel.app')))
-        ) {
-            allowOrigin = origin;
-        }
-        res.setHeader('Access-Control-Allow-Origin', allowOrigin);
-        res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
-        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept, X-Requested-With');
-        res.setHeader('Access-Control-Allow-Credentials', 'true');
         server(req, res);
     } catch (err) {
-        console.error('--- FATAL GATEWAY ERROR ---');
-        console.error(err);
         res.status(500).json({
             success: false,
             statusCode: 500,
