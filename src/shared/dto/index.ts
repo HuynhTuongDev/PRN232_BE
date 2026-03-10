@@ -21,3 +21,6 @@ export * from './review.dto';
 
 // Chatbot DTOs
 export * from './chatbot.dto';
+
+// Location DTOs
+export * from './location.dto';
