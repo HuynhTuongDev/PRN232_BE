@@ -47,7 +47,8 @@ const bootstrap = async () => {
         app.useGlobalPipes(new ValidationPipe({
             transform: true,
             whitelist: true,
-            forbidNonWhitelisted: true,
+            forbidNonWhitelisted: false,
+            transformOptions: { enableImplicitConversion: true }
         }));
 
         // Standardize error responses

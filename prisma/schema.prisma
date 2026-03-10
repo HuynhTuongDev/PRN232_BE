@@ -35,9 +35,10 @@ model User {
   updatedAt DateTime @updatedAt
 
   // Relationships
-  rentals   Rental[]
-  reviews   Review[]
-  chatMessages ChatMessage[]
+  rentals          Rental[]
+  reviews          Review[]
+  sentMessages     ChatMessage[] @relation("SentMessages")
+  receivedMessages ChatMessage[] @relation("ReceivedMessages")
 
   @@map("users")
 }
@@ -107,7 +108,20 @@ model Rental {
   status         RentalStatus @default(PENDING)
   totalPrice     Decimal      @db.Decimal(10, 2) // Tổng giá tiền
   numberOfDays   Int          // Số ngày thuê (tính toán)
-  notes          String?      @db.Text // Ghi chú
+  notes          String?      @db.Text // Ghi chú lúc đặt
+
+  // Handover Details
+  handoverKm     Int?         // Số KM lúc giao
+  handoverFuel   Int?         // Mức xăng lúc giao (1-8)
+  handoverNote   String?      @db.Text
+  handoverImages String[]     // Ảnh lúc giao xe
+
+  // Return Details
+  returnKm       Int?         // Số KM lúc trả
+  returnFuel     Int?         // Mức xăng lúc trả (1-8)
+  returnNote     String?      @db.Text
+  returnImages   String[]     // Ảnh lúc trả xe
+
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
@@ -193,17 +207,20 @@ model Review {
 // ============================================
 
 model ChatMessage {
-  id        String   @id @default(uuid())
-  userId    String?  // null nếu là khách vãng lai
-  message   String   @db.Text // Câu hỏi của người dùng
-  response  String   @db.Text // Phản hồi từ chatbot
-  isAI      Boolean  @default(true) // true nếu là phản hồi từ AI
-  createdAt DateTime @default(now())
+  id         String   @id @default(uuid())
+  senderId   String?  // null nếu là khách vãng lai hoặc hệ thống
+  receiverId String?  // null nếu là AI hoặc tin nhắn chung
+  content    String   @db.Text
+  isAI       Boolean  @default(false)
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
 
   // Relationships
-  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  sender     User?    @relation("SentMessages", fields: [senderId], references: [id], onDelete: SetNull)
+  receiver   User?    @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: SetNull)
 
-  @@index([userId])
+  @@index([senderId])
+  @@index([receiverId])
   @@index([createdAt])
   @@map("chat_messages")
 }

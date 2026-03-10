@@ -10,6 +10,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { BlogModule } from './blog/blog.module';
 import { PromotionModule } from './promotion/promotion.module';
 import { PaymentModule } from './payment/payment.module';
+import { ChatModule } from './chat/chat.module';
 import { SupabaseModule } from './shared/supabase/supabase.module';
 import { UploadModule } from './shared/upload/upload.module';
 
@@ -28,6 +29,7 @@ import { UploadModule } from './shared/upload/upload.module';
     BlogModule,
     PromotionModule,
     PaymentModule,
+    ChatModule,
     SupabaseModule,
     UploadModule,
   ],

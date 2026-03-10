@@ -158,13 +158,46 @@ export class PaymentService {
             data: { status: dbStatus },
         });
 
-        // Cập nhật rental thành CONFIRMED nếu thanh toán thành công
+    // Cập nhật rental thành CONFIRMED nếu thanh toán thành công
         if (dbStatus === 'COMPLETED') {
             await this.prisma.rental.update({
                 where: { id: payment.rentalId },
                 data: { status: 'CONFIRMED' },
             });
         }
+    }
+
+    async findAll() {
+        return this.prisma.payment.findMany({
+            include: {
+                rental: {
+                    include: {
+                        user: true,
+                    },
+                },
+            },
+            orderBy: {
+                createdAt: 'desc',
+            },
+        });
+    }
+
+    async updateStatus(id: string, status: any) {
+        return this.prisma.$transaction(async (tx) => {
+            const payment = await tx.payment.update({
+                where: { id },
+                data: { status },
+            });
+
+            if (status === 'COMPLETED') {
+                await tx.rental.update({
+                    where: { id: payment.rentalId },
+                    data: { status: 'CONFIRMED' },
+                });
+            }
+
+            return payment;
+        });
     }
 }
 

@@ -17,11 +17,12 @@ export class MotorbikeService {
     }
 
     async update(id: string, data: UpdateMotorbikeDto) {
+        console.log(`Update Motorbike ${id} with data:`, JSON.stringify(data));
         const motorbike = await this.prisma.motorbike.update({
             where: { id },
             data: {
                 ...data,
-                pricePerDay: data.pricePerDay ? data.pricePerDay.toString() as any : undefined,
+                pricePerDay: data.pricePerDay !== undefined ? data.pricePerDay.toString() as any : undefined,
             },
         });
         return { motorbike };
@@ -47,8 +48,10 @@ export class MotorbikeService {
     }
 
     async findAll(filters: MotorbikeFilterDto) {
-        const { page = 1, limit = 10, type, status, minPrice, maxPrice, search } = filters;
-        const skip = (page - 1) * limit;
+        const parsedPage = parseInt(filters.page as any, 10) || 1;
+        const parsedLimit = parseInt(filters.limit as any, 10) || 10;
+        const { type, status, minPrice, maxPrice, search } = filters;
+        const skip = (parsedPage - 1) * parsedLimit;
 
         const where: any = {};
 
@@ -70,7 +73,7 @@ export class MotorbikeService {
             this.prisma.motorbike.findMany({
                 where,
                 skip,
-                take: limit,
+                take: parsedLimit,
                 orderBy: { createdAt: 'desc' },
             }),
             this.prisma.motorbike.count({ where }),
@@ -79,8 +82,8 @@ export class MotorbikeService {
         return {
             motorbikes,
             total,
-            page,
-            limit,
+            page: parsedPage,
+            limit: parsedLimit,
         };
     }
 }
