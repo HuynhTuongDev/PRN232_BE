@@ -274,3 +274,18 @@ model Promotion {
 
   @@map("promotions")
 }
+
+// ============================================
+// LOCATION MANAGEMENT
+// ============================================
+
+model Location {
+  id        Int      @id @default(autoincrement())
+  name      String
+  count     String   // Ví dụ: "100+ Xe sẵn sàng"
+  image     String   // URL hình ảnh
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("locations")
+}

@@ -13,6 +13,7 @@ import { PaymentModule } from './payment/payment.module';
 import { ChatModule } from './chat/chat.module';
 import { SupabaseModule } from './shared/supabase/supabase.module';
 import { UploadModule } from './shared/upload/upload.module';
+import { LocationModule } from './location/location.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { UploadModule } from './shared/upload/upload.module';
     ChatModule,
     SupabaseModule,
     UploadModule,
+    LocationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
