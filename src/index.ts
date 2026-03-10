@@ -33,6 +33,35 @@ server.get('/env-check', (req, res) => {
         timestamp: new Date().toISOString()
     });
 });
+// Explicit OPTIONS handler for CORS preflight requests
+server.options('*', (req, res) => {
+    const allowedOrigins = process.env.CORS_ORIGIN
+        ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
+        : [
+            'http://localhost:3002',
+            'http://localhost:3003',
+            'https://prn-232-fe-admin.vercel.app',
+            'https://prn-232-fe-admin-git-main-huynh-tuongs-projects.vercel.app'
+        ];
+    const origin = req.headers.origin;
+    let allowOrigin = '';
+    if (!origin) {
+        allowOrigin = '*';
+    } else if (
+        allowedOrigins.includes('*') ||
+        allowedOrigins.includes(origin) ||
+        origin === 'http://localhost:3002' ||
+        origin === 'http://localhost:3003' ||
+        (origin.endsWith('.vercel.app') && allowedOrigins.some(o => o.includes('vercel.app')))
+    ) {
+        allowOrigin = origin;
+    }
+    res.setHeader('Access-Control-Allow-Origin', allowOrigin);
+    res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept, X-Requested-With');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.status(204).end();
+});
 
 let app: any;
 
