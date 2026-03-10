@@ -13,8 +13,38 @@ async function main() {
     await prisma.motorbike.deleteMany();
     await prisma.blog.deleteMany();
     await prisma.user.deleteMany();
+    await prisma.location.deleteMany();
 
-    // 2. Create Users
+    // 2. Create Locations
+    const locations = [
+        {
+            name: 'Trung tâm Quy Nhơn',
+            count: '100+ Xe sẵn sàng',
+            image: 'https://static.vinwonders.com/production/quy-nhon-co-gi-choi-12.jpg',
+        },
+        {
+            name: 'Kỳ Co',
+            count: '30+ Xe sẵn sàng',
+            image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=600',
+        },
+        {
+            name: 'Eo Gió',
+            count: '30+ Xe sẵn sàng',
+            image: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&q=80&w=600',
+        },
+        {
+            name: 'Ghềnh Ráng',
+            count: '50+ Xe sẵn sàng',
+            image: 'https://images.unsplash.com/photo-1493558103817-58b2924bce98?auto=format&fit=crop&q=80&w=600',
+        },
+    ];
+
+    for (const location of locations) {
+        await prisma.location.create({ data: location });
+    }
+    console.log('Locations created:', locations.length);
+
+    // 3. Create Users
     const hashedPassword = await bcrypt.hash('123456', 10);
 
     const admin = await prisma.user.create({
