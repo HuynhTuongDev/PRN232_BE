@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { calculateDays } from '../shared';
+import { calculateDays, RentalStatus } from '../shared';
 
 @Injectable()
 export class RentalService {
@@ -99,7 +99,7 @@ export class RentalService {
 
         // Validate state transitions
         const currentStatus = rental.status;
-        
+
         if (status === 'ONGOING' && currentStatus !== 'CONFIRMED') {
             throw new BadRequestException('Chỉ có thể bàn giao xe cho đơn đã xác nhận/thanh toán');
         }
@@ -109,7 +109,7 @@ export class RentalService {
         }
 
         const data: any = { status };
-        
+
         // Handle Handover Metadata
         if (status === 'ONGOING' && metadata) {
             data.handoverKm = Number(metadata.km);
@@ -140,7 +140,7 @@ export class RentalService {
         }
 
         if (status === 'ONGOING') {
-             await this.prisma.motorbike.update({
+            await this.prisma.motorbike.update({
                 where: { id: updatedRental.motorbikeId },
                 data: { status: 'RENTED' },
             });
@@ -183,37 +183,47 @@ export class RentalService {
         };
     }
 
-    async listAll(page: number, limit: number, status?: any) {
+    async listAll(page: number, limit: number, status?: RentalStatus) {
         const skip = (page - 1) * limit;
-        const where = status ? { status } : {};
+        const where: any = {};
+        if (status) {
+            where.status = status;
+        }
 
-        const [rentals, total] = await Promise.all([
-            this.prisma.rental.findMany({
-                where,
-                include: {
-                    user: {
-                        select: {
-                            id: true,
-                            name: true,
-                            email: true,
+        try {
+            const [rentals, total] = await Promise.all([
+                this.prisma.rental.findMany({
+                    where,
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true,
+                                phone: true,
+                            },
                         },
+                        motorbike: true,
+                        payments: true,
                     },
-                    motorbike: true,
-                    payments: true,
-                },
-                skip,
-                take: limit,
-                orderBy: { createdAt: 'desc' },
-            }),
-            this.prisma.rental.count({ where }),
-        ]);
+                    skip,
+                    take: limit,
+                    orderBy: { createdAt: 'desc' },
+                }),
+                this.prisma.rental.count({ where }),
+            ]);
 
-        return {
-            rentals,
-            total,
-            page,
-            limit,
-        };
+            return {
+                rentals,
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit),
+            };
+        } catch (error) {
+            console.error('Rental listAll Error:', error);
+            throw error; // Let the global filter handle it with the improved message
+        }
     }
 }
 

@@ -128,7 +128,8 @@ model Rental {
   // Relationships
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   motorbike      Motorbike    @relation(fields: [motorbikeId], references: [id])
-  payments       Payment[]
+  payments       Payment[]    // Change to array if needed, but currently one-to-one in Payment. Keeping as array for now to match current service usage but fixing the naming inconsistency if any. Actually, Payment model has @unique on rentalId, so it IS 1-to-1. Let's keep it as array but ensure service handles it. Wait, the service uses include: { payments: true }. If I change it to singular, I must update the service.
+  // Let's stick to what works with current code first but fix the most likely cause: include syntax.
   review         Review?
 
   @@index([userId])
