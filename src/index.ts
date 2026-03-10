@@ -33,17 +33,14 @@ const bootstrap = async () => {
         // Standardize error responses
         app.useGlobalFilters(new GlobalExceptionFilter());
 
-        // Enable CORS đơn giản
+        // Enable CORS robustly for Vercel
         app.enableCors({
-            origin: [
-                'http://localhost:3002',
-                'http://localhost:3003',
-                'https://prn-232-fe-admin.vercel.app',
-                'https://prn-232-fe-admin-git-main-huynh-tuongs-projects.vercel.app'
-            ],
+            origin: true, // Reflect the request origin
             credentials: true,
             methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
-            allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
+            allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With', 'Origin', 'Access-Control-Allow-Origin'],
+            preflightContinue: false,
+            optionsSuccessStatus: 204,
         });
 
         const apiPrefix = process.env.API_PREFIX || 'api/v1';
