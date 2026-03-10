@@ -1,4 +1,4 @@
-import { PrismaClient, MotorbikeType, MotorbikeStatus } from '@prisma/client';
+import { PrismaClient, UserRole, MotorbikeType, MotorbikeStatus } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();

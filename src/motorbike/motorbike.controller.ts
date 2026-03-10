@@ -21,7 +21,7 @@ import {
     CallHandler
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor, AnyFilesInterceptor } from '@nestjs/platform-express';
 import { MotorbikeService } from './motorbike.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';

@@ -92,13 +92,27 @@ export class RentalController {
     @HttpCode(HttpStatus.OK)
     async updateStatus(
         @Param('id') id: string,
-        @Body() updateDto: UpdateRentalStatusDto,
+        @Body() updateDto: any,
     ): Promise<ApiResponse> {
-        const result = await this.rentalService.updateStatus(id, updateDto.status);
+        const result = await this.rentalService.updateStatus(id, updateDto.status, updateDto.metadata);
         return {
             success: true,
             data: result.rental,
             message: 'Cập nhật trạng thái đơn thuê thành công',
+        };
+    }
+
+    @Put(':id/metadata')
+    @HttpCode(HttpStatus.OK)
+    async updateMetadata(
+        @Param('id') id: string,
+        @Body() metadata: any,
+    ): Promise<ApiResponse> {
+        const result = await this.rentalService.updateMetadata(id, metadata);
+        return {
+            success: true,
+            data: result,
+            message: 'Cập nhật thông tin bàn giao/thu hồi thành công',
         };
     }
 }

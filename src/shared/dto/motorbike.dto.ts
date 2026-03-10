@@ -1,14 +1,17 @@
 import {
     IsString,
     IsNotEmpty,
+    IsInt,
     IsNumber,
     IsOptional,
     IsEnum,
     IsArray,
     Min,
     Max,
+    MAX_LENGTH,
     MaxLength
 } from 'class-validator';
+import { Type, Transform } from 'class-transformer';
 import { MotorbikeType, MotorbikeStatus } from '../types';
 
 /**
@@ -27,6 +30,7 @@ export class CreateMotorbikeDto {
     @IsNumber({}, { message: 'Giá thuê phải là một số' })
     @Min(0, { message: 'Giá thuê không được nhỏ hơn 0' })
     @IsNotEmpty({ message: 'Giá thuê không được để trống' })
+    @Type(() => Number)
     pricePerDay: number;
 
     @IsString()
@@ -43,10 +47,12 @@ export class CreateMotorbikeDto {
     @IsOptional()
     @Min(1900)
     @Max(new Date().getFullYear())
+    @Type(() => Number)
     year?: number;
 
     @IsArray({ message: 'Danh sách hình ảnh phải là một mảng' })
     @IsOptional()
+    @Transform(({ value }) => typeof value === 'string' ? [value] : value)
     images?: string[];
 
     @IsString()
@@ -74,6 +80,7 @@ export class UpdateMotorbikeDto {
     @IsNumber()
     @IsOptional()
     @Min(0)
+    @Type(() => Number)
     pricePerDay?: number;
 
     @IsString()
@@ -87,7 +94,20 @@ export class UpdateMotorbikeDto {
 
     @IsArray()
     @IsOptional()
+    @Transform(({ value }) => typeof value === 'string' ? [value] : value)
     images?: string[];
+
+    @IsString()
+    @IsOptional()
+    @MaxLength(20)
+    licensePlate?: string;
+
+    @IsNumber()
+    @IsOptional()
+    @Min(1900)
+    @Max(new Date().getFullYear())
+    @Type(() => Number)
+    year?: number;
 
     @IsString()
     @IsOptional()
@@ -118,10 +138,12 @@ export class MotorbikeFilterDto {
 
     @IsNumber()
     @IsOptional()
+    @Type(() => Number)
     minPrice?: number;
 
     @IsNumber()
     @IsOptional()
+    @Type(() => Number)
     maxPrice?: number;
 
     @IsEnum(MotorbikeStatus)
@@ -134,9 +156,11 @@ export class MotorbikeFilterDto {
 
     @IsNumber()
     @IsOptional()
+    @Type(() => Number)
     page?: number = 1;
 
     @IsNumber()
     @IsOptional()
+    @Type(() => Number)
     limit?: number = 10;
 }
