@@ -27,7 +27,7 @@ export class ChatController {
 
     @Post('send')
     async sendMessage(@Request() req, @Body() body: { receiverId?: string; content: string; isAI?: boolean }) {
-        const senderId = req.user.id;
+        const senderId = req.user.role === UserRole.ADMIN ? 'admin-placeholder' : req.user.id;
         const message = await this.chatService.sendMessage({
             senderId,
             receiverId: body.receiverId,
