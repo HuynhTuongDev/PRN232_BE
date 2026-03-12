@@ -11,6 +11,7 @@ import {
 import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { ChatService } from './chat.service';
+import { PusherService } from './pusher.service';
 
 @WebSocketGateway({
     cors: {
@@ -22,8 +23,11 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     @WebSocketServer() server: Server;
     private logger: Logger = new Logger('ChatGateway');
 
-    constructor(private readonly chatService: ChatService) {
-        this.logger.log('ChatGateway initialized in constructor');
+    constructor(
+        private readonly chatService: ChatService,
+        private readonly pusherService: PusherService,
+    ) {
+        this.logger.log('ChatGateway initialized with PusherService');
     }
 
     @SubscribeMessage('send_message')
@@ -46,15 +50,18 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         });
 
         // Determine receiver room
-        const receiverRoom = payload.receiverId === 'admin-placeholder' ? 'admin-room' : (payload.receiverId || 'admin-room');
+        const receiverId = payload.receiverId === 'admin-placeholder' ? 'admin-room' : (payload.receiverId || 'admin-room');
         
-        this.logger.log(`Message from ${senderId} to ${receiverRoom}: ${payload.content}`);
+        this.logger.log(`Message from ${senderId} to ${receiverId}: ${payload.content}`);
 
-        // Emit to receiver's room
-        this.server.to(receiverRoom).emit('receive_message', message);
-        
-        // Also emit back to sender's room
+        // 1. Emit via Socket.io (for local development/persistent server)
+        this.server.to(receiverId).emit('receive_message', message);
         this.server.to(senderId).emit('receive_message', message);
+
+        // 2. Trigger via Pusher (for Vercel serverless environment)
+        // We trigger to both sender and receiver channels
+        await this.pusherService.trigger(receiverId, 'receive_message', message);
+        await this.pusherService.trigger(senderId, 'receive_message', message);
 
         return { event: 'message_sent', data: message };
     }
