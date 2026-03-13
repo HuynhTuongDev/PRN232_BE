@@ -55,7 +55,7 @@ export class PaymentController {
         }
 
         // Redirect về frontend success page (Port 3002)
-        return res.redirect(`http://localhost:3002/payment/success?orderCode=${orderCode}&code=${code}&status=${status}`);
+        return res.redirect(`https://go-ride-web-user.vercel.app/payment/success?orderCode=${orderCode}&code=${code}&status=${status}`);
     }
 
     // PayOS redirect khi huỷ thanh toán
@@ -67,7 +67,7 @@ export class PaymentController {
         @Res() res: Response,
     ) {
         // Redirect về frontend cancel page (Port 3002)
-        return res.redirect(`http://localhost:3002/payment/cancel?orderCode=${orderCode}&code=${code}`);
+        return res.redirect(`https://go-ride-web-user.vercel.app/payment/cancel?orderCode=${orderCode}&code=${code}`);
     }
 
     @Get('all')
