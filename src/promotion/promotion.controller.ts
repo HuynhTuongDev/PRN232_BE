@@ -65,6 +65,30 @@ export class PromotionController {
         }
     }
 
+    @Get('code/:code')
+    @HttpCode(HttpStatus.OK)
+    async findByCode(@Param('code') code: string): Promise<ApiResponse> {
+        try {
+            const promotion = await this.promotionService.findByCode(code);
+            if (!promotion) {
+                return {
+                    success: false,
+                    error: 'Mã khuyến mãi không hợp lệ hoặc đã hết hạn',
+                };
+            }
+            return {
+                success: true,
+                data: promotion,
+                message: 'Áp dụng mã khuyến mãi thành công',
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message || 'Lỗi khi kiểm tra mã khuyến mãi',
+            };
+        }
+    }
+
     @Post()
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(UserRole.ADMIN)

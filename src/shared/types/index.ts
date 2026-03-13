@@ -66,6 +66,7 @@ export interface Rental {
   totalPrice: number;
   numberOfDays: number;
   notes?: string;
+  promoCode?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -107,6 +108,41 @@ export interface Review {
   comment?: string;
   createdAt: Date;
   updatedAt: Date;
+}
+
+// Blog Types
+export interface Blog {
+    id: string;
+    title: string;
+    description?: string;
+    content: string;
+    image: string;
+    tag?: string;
+    author?: string;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+export enum DiscountType {
+    PERCENTAGE = 'PERCENTAGE',
+    FIXED_AMOUNT = 'FIXED_AMOUNT',
+}
+
+export interface Promotion {
+    id: string;
+    title: string;
+    description: string;
+    code: string;
+    discountType: DiscountType;
+    discountValue: number;
+    minOrderValue: number;
+    image: string;
+    badge?: string;
+    startDate?: Date;
+    endDate?: Date;
+    isActive: boolean;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 // API Response Types
