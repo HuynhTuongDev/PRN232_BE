@@ -131,9 +131,9 @@ export class RentalService {
             throw new BadRequestException('Chỉ có thể thu hồi xe cho đơn đang trong quá trình thuê');
         }
 
-        // Only allow cancel if current status is PENDING or CONFIRMED
-        if (status === 'CANCELLED' && currentStatus !== 'PENDING' && currentStatus !== 'CONFIRMED') {
-            throw new BadRequestException('Chỉ có thể hủy đơn thuê khi chưa thanh toán hoặc đã xác nhận');
+        // Only allow cancel if current status is PENDING (chưa thanh toán)
+        if (status === 'CANCELLED' && currentStatus !== 'PENDING') {
+            throw new BadRequestException('Chỉ có thể hủy đơn thuê khi chưa chuyển tiền');
         }
 
         const data: any = { status };
