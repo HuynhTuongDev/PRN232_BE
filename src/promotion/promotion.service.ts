@@ -21,10 +21,33 @@ export class PromotionService {
         return { promotion };
     }
 
+    async findByCode(code: string) {
+        const promotion = await (this.prisma.promotion as any).findFirst({
+            where: { code, isActive: true },
+        });
+
+        if (!promotion) return null;
+
+        // Check date
+        const now = new Date();
+        if (promotion.startDate && new Date(promotion.startDate) > now) return null;
+        if (promotion.endDate && new Date(promotion.endDate) < now) return null;
+
+        return promotion;
+    }
+
     async create(dto: CreatePromotionDto) {
-        const promotion = await this.prisma.promotion.create({
+        const promotion = await (this.prisma.promotion as any).create({
             data: {
-                ...dto,
+                title: dto.title,
+                description: dto.description,
+                code: dto.code,
+                discountType: dto.discountType,
+                discountValue: dto.discountValue,
+                minOrderValue: dto.minOrderValue || 0,
+                badge: dto.badge,
+                image: dto.image,
+                isActive: dto.isActive,
                 startDate: dto.startDate ? new Date(dto.startDate) : undefined,
                 endDate: dto.endDate ? new Date(dto.endDate) : undefined,
             },

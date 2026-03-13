@@ -7,7 +7,7 @@ export class RentalService {
     constructor(private prisma: PrismaService) { }
 
     async create(data: any) {
-        const { userId, motorbikeId, startDate, endDate, pickupLocation, returnLocation, notes } = data;
+        const { userId, motorbikeId, startDate, endDate, pickupLocation, returnLocation, notes, promoCode } = data;
 
         // Check if motorbike exists and is available
         const motorbike = await this.prisma.motorbike.findUnique({
@@ -28,7 +28,29 @@ export class RentalService {
             throw new BadRequestException('Ngày kết thúc phải sau ngày bắt đầu');
         }
 
-        const totalPrice = Number(motorbike.pricePerDay) * days;
+        let totalPrice = Number(motorbike.pricePerDay) * days;
+
+        // Apply promotion if exists
+        if (promoCode) {
+            const promotion = await (this.prisma.promotion as any).findFirst({
+                where: { code: promoCode, isActive: true },
+            });
+
+            if (promotion) {
+                const now = new Date();
+                const isValidDate = (!promotion.startDate || new Date(promotion.startDate) <= now) &&
+                                   (!promotion.endDate || new Date(promotion.endDate) >= now);
+                
+                if (isValidDate && totalPrice >= Number(promotion.minOrderValue)) {
+                    if (promotion.discountType === 'PERCENTAGE') {
+                        totalPrice -= (totalPrice * Number(promotion.discountValue)) / 100;
+                    } else {
+                        totalPrice -= Number(promotion.discountValue);
+                    }
+                    if (totalPrice < 0) totalPrice = 0;
+                }
+            }
+        }
 
         try {
             const rental = await this.prisma.$transaction(async (tx) => {
@@ -44,9 +66,10 @@ export class RentalService {
                         totalPrice,
                         numberOfDays: days,
                         notes,
+                        promoCode: promoCode || null,
                         status: 'PENDING',
                     },
-                });
+                } as any);
 
                 // Update motorbike status
                 await tx.motorbike.update({

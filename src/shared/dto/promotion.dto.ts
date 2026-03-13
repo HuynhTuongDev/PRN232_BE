@@ -10,6 +10,19 @@ export class CreatePromotionDto {
     @IsNotEmpty({ message: 'Mô tả không được để trống' })
     description: string;
 
+    @IsString({ message: 'Mã khuyến mãi phải là chuỗi ký tự' })
+    @IsNotEmpty({ message: 'Mã khuyến mãi không được để trống' })
+    code: string;
+
+    @IsOptional()
+    discountType?: string; // Tên enum string
+
+    @IsNotEmpty({ message: 'Giá trị giảm giá không được để trống' })
+    discountValue: number;
+
+    @IsOptional()
+    minOrderValue?: number;
+
     @IsOptional()
     @IsUrl({}, { message: 'Đường dẫn hình ảnh không hợp lệ' })
     image?: string;
@@ -40,6 +53,19 @@ export class UpdatePromotionDto {
     @IsOptional()
     @IsString({ message: 'Mô tả phải là chuỗi ký tự' })
     description?: string;
+
+    @IsOptional()
+    @IsString({ message: 'Mã khuyến mãi phải là chuỗi ký tự' })
+    code?: string;
+
+    @IsOptional()
+    discountType?: string;
+
+    @IsOptional()
+    discountValue?: number;
+
+    @IsOptional()
+    minOrderValue?: number;
 
     @IsOptional()
     @IsUrl({}, { message: 'Đường dẫn hình ảnh không hợp lệ' })

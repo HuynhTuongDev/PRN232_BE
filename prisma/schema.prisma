@@ -109,6 +109,7 @@ model Rental {
   totalPrice     Decimal      @db.Decimal(10, 2) // Tổng giá tiền
   numberOfDays   Int          // Số ngày thuê (tính toán)
   notes          String?      @db.Text // Ghi chú lúc đặt
+  promoCode      String?      // Mã khuyến mãi đã áp dụng
 
   // Handover Details
   handoverKm     Int?         // Số KM lúc giao
@@ -256,21 +257,26 @@ model Blog {
   @@map("blogs")
 }
 
-// ============================================
-// PROMOTIONS & OFFERS
-// ============================================
+enum DiscountType {
+  PERCENTAGE
+  FIXED_AMOUNT
+}
 
 model Promotion {
-  id          String   @id @default(uuid())
-  title       String
-  description String   @db.Text
-  image       String?  // URL hình ảnh
-  badge       String?  // Ví dụ: "20% OFF", "Mới"
-  startDate   DateTime?
-  endDate     DateTime?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String    @id @default(uuid())
+  title          String
+  description    String    @db.Text
+  code           String    @unique
+  discountType   DiscountType @default(PERCENTAGE)
+  discountValue  Decimal   @db.Decimal(10, 2)
+  minOrderValue  Decimal   @default(0) @db.Decimal(10, 2)
+  image          String?   // URL hình ảnh
+  badge          String?   // Ví dụ: "20% OFF", "Mới"
+  startDate      DateTime?
+  endDate        DateTime?
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   @@map("promotions")
 }
