@@ -25,6 +25,10 @@ export class CreateRentalDto {
     @IsString({ message: 'Ghi chú phải là chuỗi ký tự' })
     @IsOptional()
     notes?: string;
+
+    @IsString({ message: 'Mã khuyến mãi phải là chuỗi ký tự' })
+    @IsOptional()
+    promoCode?: string;
 }
 
 export class UpdateRentalStatusDto {

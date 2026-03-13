@@ -177,6 +177,39 @@ async function main() {
         },
     });
 
+    // 6. Create Promotions
+    const promotions = [
+        {
+            title: 'Ưu đãi Chào mừng 20%',
+            description: 'Giảm ngay 20% cho khách hàng mới đặt xe lần đầu tại GoRide Quy Nhơn.',
+            code: 'CHAOMUNG20',
+            discountType: 'PERCENTAGE',
+            discountValue: 20,
+            minOrderValue: 200000,
+            badge: '20% OFF',
+            startDate: new Date(),
+            endDate: new Date(Date.now() + 86400000 * 30), // 30 days
+            image: 'https://images.unsplash.com/photo-1558981403-c5f91eb1238e?auto=format&fit=crop&q=80&w=800',
+        },
+        {
+            title: 'Giảm giá cực sốc 50K',
+            description: 'Giảm trực tiếp 50.000 VNĐ cho các đơn hàng từ 500.000 VNĐ.',
+            code: 'GORIDE50K',
+            discountType: 'FIXED_AMOUNT',
+            discountValue: 50000,
+            minOrderValue: 500000,
+            badge: 'GIẢM 50K',
+            startDate: new Date(),
+            endDate: new Date(Date.now() + 86400000 * 30),
+            image: 'https://images.unsplash.com/photo-1591637333184-19aa84b3e01f?auto=format&fit=crop&q=80&w=800',
+        }
+    ];
+
+    for (const promo of promotions) {
+        await (prisma.promotion as any).create({ data: promo });
+    }
+
+    console.log('Promotions created:', promotions.length);
     console.log('Motorbikes created:', motorbikes.length);
     console.log('Blogs created:', blogs.length);
     console.log('\n============================');
