@@ -88,7 +88,6 @@ export class RentalController {
     }
 
     @Put(':id/status')
-    @Roles(UserRole.ADMIN)
     @HttpCode(HttpStatus.OK)
     async updateStatus(
         @Param('id') id: string,

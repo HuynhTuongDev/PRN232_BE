@@ -39,8 +39,8 @@ export class RentalService {
             if (promotion) {
                 const now = new Date();
                 const isValidDate = (!promotion.startDate || new Date(promotion.startDate) <= now) &&
-                                   (!promotion.endDate || new Date(promotion.endDate) >= now);
-                
+                    (!promotion.endDate || new Date(promotion.endDate) >= now);
+
                 if (isValidDate && totalPrice >= Number(promotion.minOrderValue)) {
                     if (promotion.discountType === 'PERCENTAGE') {
                         totalPrice -= (totalPrice * Number(promotion.discountValue)) / 100;
@@ -129,6 +129,11 @@ export class RentalService {
 
         if (status === 'COMPLETED' && currentStatus !== 'ONGOING') {
             throw new BadRequestException('Chỉ có thể thu hồi xe cho đơn đang trong quá trình thuê');
+        }
+
+        // Only allow cancel if current status is PENDING or CONFIRMED
+        if (status === 'CANCELLED' && currentStatus !== 'PENDING' && currentStatus !== 'CONFIRMED') {
+            throw new BadRequestException('Chỉ có thể hủy đơn thuê khi chưa thanh toán hoặc đã xác nhận');
         }
 
         const data: any = { status };
